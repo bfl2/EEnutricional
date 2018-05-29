@@ -3,6 +3,7 @@ import mutation as mut
 import random
 import numpy as np
 from operator import itemgetter
+from nutrientesDataset import nutDataset
 
 
 def removeFit(pop):
