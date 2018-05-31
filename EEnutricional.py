@@ -4,36 +4,76 @@ import random
 import numpy as np
 from operator import itemgetter
 from nutrientesDataset import nutDataset
+from nutrientesDataset import target
 
 
-def removeFit(pop):
-    res =[]
-    for e in pop:
-        res.append(e[0])
-    return res
 
 
-def generateIndivI():
-    n = 30
-    indiv = []
-    while (len(indiv) < n):
-        indiv.append(round(random.randint(-15, 15), 5))
 
+def fooIndiv():
+    indiv = createIndiv()
+    addProduto(indiv, getProduto(1), 3)
+    addProduto(indiv, getProduto(2), 2)
+    addProduto(indiv, getProduto(3), 1)
+    addProduto(indiv, getProduto(4), 1)
+    addProduto(indiv, getProduto(6), 1)
+    addProduto(indiv, getProduto(6), 1)
     return indiv
 
 
-def generateIndiv():
-    n = 30
-    sigma = 1.2
-    chromossome= []
-    while (len( chromossome) < n):
-        chromossome.append(round(random.uniform(-15, 15), 5))
-    fit = fitness(chromossome)
-    indiv = [chromossome,fit,sigma]
+
+def createIndiv():
+    fit = "-1"
+    cesta = []
+    indiv ={"fitness":fit, "cesta":cesta}
 
     return indiv
+def addProduto(indiv,produto,quantidade):
+    done = False
+    for prod in indiv["cesta"]:
+        if(produto["_id"]==prod["_id"]):#checka se produto ja esta na lista
+            prod["quantidade"] = prod["quantidade"] + quantidade
+            done = True
+            break
+    if(not done):
+        prod = dict(produto)#copia o dicionario de referencia do produto
+        prod["quantidade"] = quantidade
+        indiv["cesta"].append(prod)
+
+    return indiv
+def getProduto(id):
+    produtoCopy = dict(nutDataset[id])
+    return produtoCopy
 
 
+def sumNutrientes(indiv):
+    totalNutrientes = {'proteina': 0, 'lipideos': 0, 'colesterol': 0, 'carboidrato': 0, 'fibra_alimentar': 0,
+                       'calcio': 0, 'magnesio': 0, 'manganes': 0, 'fosforo': 0,
+                       'ferro': 0, 'sodio': 0, 'potassio': 0, 'cobre': 0, 'zinco': 0, 'vitamina_c': 0, 'kcal': 0}
+
+    for alimento in indiv["cesta"]:  # Somando os nutrientes
+        for nutriente in totalNutrientes:
+            totalNutrientes[nutriente] = totalNutrientes[nutriente] + alimento[nutriente]*alimento["quantidade"]
+
+    return totalNutrientes
+
+def fitness(indiv): #o individuo eh uma cesta de alimentos
+    fit = 0
+    totalNutrientes = sumNutrientes(indiv)
+    pesosNutrientes = [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+    difPercentual = []
+    for key in totalNutrientes:
+        difPercentual.append(abs(totalNutrientes[key]-target[key])/target[key]) # diferenca absoluta percentual do
+    print(difPercentual)
+    difPercentualWeighted = [a * b for a, b in zip(difPercentual, pesosNutrientes)]
+    print(difPercentualWeighted, len(difPercentual))
+    print(totalNutrientes)
+    fit = sum(difPercentualWeighted)
+
+    return fit
+
+
+### do EEAckley
 #gera os individuos para o caso do vetor de sigmas
 def generateIndiv2():
     n = 30
@@ -84,20 +124,6 @@ def generateChildren(allParents,childrenCount):
 
     return childrenList
 
-
-def fitness(chromossome):
-    c1=20
-    c2=0.2
-    c3=2*np.pi
-    sum1 = 0
-    sum2 = 0
-    for xi in chromossome:
-        sum1+= xi**2
-        sum2+= np.cos(c3*xi)
-    sum1 = sum1/len(chromossome)
-    sum2 = sum2/len(chromossome)
-    fit = -c1*np.exp(-c2*np.sqrt(sum1)) - np.exp(sum2) + c1 + np.e
-    return round(fit,5)
 
 def getAvgFit(pop):
     sum = 0
