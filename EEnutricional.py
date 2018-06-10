@@ -3,46 +3,65 @@ import mutation as mut
 import random
 import numpy as np
 from operator import itemgetter
-from nutrientesDataset import nutDataset
-from nutrientesDataset import target
+import nutrientesDataset as nutdts
 
+
+
+
+def displayIndiv(indiv):
+    i =0
+    for ali_id in indiv["alimentos_id"]:
+        print("id:{} alimento:{} quantidade:{}".format(ali_id,get_alimento(ali_id)["descricao"],indiv["alimentos_quantidade"][i]))
+        i+=1
+    return
 
 
 
 
 def fooIndiv():
     indiv = createIndiv()
-    addProduto(indiv, getProduto(1), 3)
-    addProduto(indiv, getProduto(2), 2)
-    addProduto(indiv, getProduto(3), 1)
-    addProduto(indiv, getProduto(4), 1)
-    addProduto(indiv, getProduto(6), 1)
-    addProduto(indiv, getProduto(6), 1)
+    sample = random.sample(nutdts.alimentos_id, 10)
+    for id in sample:
+        add_alimento(indiv,id,1)
     return indiv
 
 
 
 def createIndiv():
+    ## alimentos_quantidade e alimentos_id possuem o mesmo tamanho, sendo os valores de cada indice i representantes
+    ## de qual alimento do dataset eh este(alimentos_id) e sua quantidade(alimentos_quantidade)
+    n = 60
     fit = "-1"
-    cesta = []
-    indiv ={"fitness":fit, "cesta":cesta}
+    alimentos_quantidade = []
+    sigma = [round(random.uniform(-15, 15), 5) for x in range(n)]
+
+    while (len(alimentos_quantidade) < n):
+        alimentos_quantidade.append(round(random.uniform(0, 1)))
+
+    indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id, "sigma":sigma}
+    fit = fitness(indiv)
+    indiv["fitness"] = fit
+
 
     return indiv
-def addProduto(indiv,produto,quantidade):
+
+def add_alimento(indiv, produto_id, quantidade):
     done = False
-    for prod in indiv["cesta"]:
-        if(produto["_id"]==prod["_id"]):#checka se produto ja esta na lista
-            prod["quantidade"] = prod["quantidade"] + quantidade
-            done = True
-            break
-    if(not done):
-        prod = dict(produto)#copia o dicionario de referencia do produto
-        prod["quantidade"] = quantidade
-        indiv["cesta"].append(prod)
+    arr_index = 0
+    if(type(produto_id)==int): #caso o id do produto seja passado, ao inves do dicionario do produto
+        produto = get_alimento(produto_id)
+        try:
+            arr_index = indiv["alimentos_id"].index(produto_id)
+            indiv["alimentos_quantidade"][arr_index] = round(max((indiv["alimentos_quantidade"][arr_index] + quantidade), 0)) #quantidade sempre positiva
+        except:
+            print("Id do produto:{} fora da selecao de ids".format(produto_id))
+    else:
+        print("add_alimento falhou, produto_id != int")
 
     return indiv
-def getProduto(id):
-    produtoCopy = dict(nutDataset[id])
+
+def get_alimento(id):
+    produtoCopy = dict(nutdts.nutDataset[id])
     return produtoCopy
 
 
@@ -50,38 +69,44 @@ def sumNutrientes(indiv):
     totalNutrientes = {'proteina': 0, 'lipideos': 0, 'colesterol': 0, 'carboidrato': 0, 'fibra_alimentar': 0,
                        'calcio': 0, 'magnesio': 0, 'manganes': 0, 'fosforo': 0,
                        'ferro': 0, 'sodio': 0, 'potassio': 0, 'cobre': 0, 'zinco': 0, 'vitamina_c': 0, 'kcal': 0}
-
-    for alimento in indiv["cesta"]:  # Somando os nutrientes
+    i = 0
+    for alimento_id in indiv["alimentos_id"]:  # Somando os nutrientes
+        alimento = get_alimento(alimento_id)
         for nutriente in totalNutrientes:
-            totalNutrientes[nutriente] = totalNutrientes[nutriente] + alimento[nutriente]*alimento["quantidade"]
+            totalNutrientes[nutriente] = totalNutrientes[nutriente] + alimento[nutriente]*indiv["alimentos_quantidade"][i]
+        i+=1
 
     return totalNutrientes
 
 def fitness(indiv): #o individuo eh uma cesta de alimentos
+    fitnessDebugFlag = False
     fit = 0
     totalNutrientes = sumNutrientes(indiv)
-    pesosNutrientes = [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+    pesosNutrientes = [3, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10]  # Ordem: proteina,lipideos,colesterol,carboidrato,fibra_alimentar,calcio,magnesio,
+                                                                         # manganes,fosforo,ferro,sodio,potassio,cobre,zinco,vitamina_c,kcal
+
     difPercentual = []
     for key in totalNutrientes:
-        difPercentual.append(abs(totalNutrientes[key]-target[key])/target[key]) # diferenca absoluta percentual do
-    print(difPercentual)
+        difPercentual.append(abs(totalNutrientes[key]-nutdts.target[key])/nutdts.target[key]) # diferenca absoluta percentual do
+
     difPercentualWeighted = [a * b for a, b in zip(difPercentual, pesosNutrientes)]
-    print(difPercentualWeighted, len(difPercentual))
-    print(totalNutrientes)
+    if(fitnessDebugFlag == True):
+        print(difPercentual)
+        print(difPercentualWeighted, len(difPercentual))
+        print(totalNutrientes)
     fit = sum(difPercentualWeighted)
 
     return fit
-
 
 ### do EEAckley
 #gera os individuos para o caso do vetor de sigmas
 def generateIndiv2():
     n = 30
-    sigma = [round(random.uniform(-15, 15), 5) for x in range(30)]
+    sigma = [round(random.uniform(-15, 15), 5) for x in range(60)]
     chromossome= []
 
     while (len( chromossome) < n):
-        chromossome.append(round(random.uniform(-15, 15), 5))
+        chromossome.append(round(random.uniform(0,15), 5))
     fit = fitness(chromossome)
     indiv = [chromossome, fit, sigma]
 
