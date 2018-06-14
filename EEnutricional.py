@@ -10,24 +10,43 @@ import nutrientesDataset as nutdts
 
 def displayIndiv(indiv):
     i =0
+    nutKeys = ["proteina", "lipideos", "colesterol", "carboidrato", "fibra_alimentar", "calcio", "magnesio",
+                "manganes", "fosforo", "ferro", "sodio", "potassio", "cobre", "zinco", "vitamina_c", "kcal"]
     for ali_id in indiv["alimentos_id"]:
-        print("id:{} alimento:{} quantidade:{}".format(ali_id,get_alimento(ali_id)["descricao"],indiv["alimentos_quantidade"][i]))
+
+        if(indiv["alimentos_quantidade"][i]>0):
+            print("{} X {}".format(indiv["alimentos_quantidade"][i], get_alimento(ali_id)["descricao"]))
         i+=1
+    sum = sumNutrientes(indiv)
+    for nutriente in nutKeys:
+        print ("{}: {}/{}".format(nutriente,round(sum[nutriente],3),nutdts.target[nutriente]));
+
     return
+
+def displayPopFit(pop):
+    i = 0
+    for indiv in pop:
+        print("indiv:{} Fitness:{}".format(i,indiv["fitness"]))
+        i+=1
 
 
 
 
 def fooIndiv():
-    indiv = createIndiv()
+    indiv = generateIndiv()
     sample = random.sample(nutdts.alimentos_id, 10)
     for id in sample:
         add_alimento(indiv,id,1)
     return indiv
+def concatListDict(list1, list2):
+    for dict in list2:
+        list1.append(dict)
+    return list1
 
 
 
-def createIndiv():
+
+def generateIndiv():
     ## alimentos_quantidade e alimentos_id possuem o mesmo tamanho, sendo os valores de cada indice i representantes
     ## de qual alimento do dataset eh este(alimentos_id) e sua quantidade(alimentos_quantidade)
     n = 60
@@ -82,12 +101,13 @@ def fitness(indiv): #o individuo eh uma cesta de alimentos
     fitnessDebugFlag = False
     fit = 0
     totalNutrientes = sumNutrientes(indiv)
-    pesosNutrientes = [3, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10]  # Ordem: proteina,lipideos,colesterol,carboidrato,fibra_alimentar,calcio,magnesio,
-                                                                         # manganes,fosforo,ferro,sodio,potassio,cobre,zinco,vitamina_c,kcal
+    pesosNutrientes = [3, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10]  # Ordem:
+    pesosKey = ["proteina","lipideos","colesterol","carboidrato","fibra_alimentar","calcio","magnesio","manganes","fosforo","ferro","sodio","potassio","cobre","zinco","vitamina_c","kcal"]
 
     difPercentual = []
     for key in totalNutrientes:
         difPercentual.append(abs(totalNutrientes[key]-nutdts.target[key])/nutdts.target[key]) # diferenca absoluta percentual do
+
 
     difPercentualWeighted = [a * b for a, b in zip(difPercentual, pesosNutrientes)]
     if(fitnessDebugFlag == True):
@@ -95,29 +115,16 @@ def fitness(indiv): #o individuo eh uma cesta de alimentos
         print(difPercentualWeighted, len(difPercentual))
         print(totalNutrientes)
     fit = sum(difPercentualWeighted)
+    indiv["fitness"] = fit
 
     return fit
-
-### do EEAckley
-#gera os individuos para o caso do vetor de sigmas
-def generateIndiv2():
-    n = 30
-    sigma = [round(random.uniform(-15, 15), 5) for x in range(60)]
-    chromossome= []
-
-    while (len( chromossome) < n):
-        chromossome.append(round(random.uniform(0,15), 5))
-    fit = fitness(chromossome)
-    indiv = [chromossome, fit, sigma]
-
-    return indiv
 
 
 def generatePop(size):
     pop = []
     while (len(pop)< size):
-        pop.append(generateIndiv2())
-    pop = sorted(pop, key=itemgetter(1))
+        pop.append(generateIndiv())
+    pop = sorted(pop, key=fitness)
     return pop
 
 
@@ -137,23 +144,22 @@ def generateChildren(allParents,childrenCount):
     children = []
     childrenList = []
     while (len(children)<childrenCount):
-        parents = get2RandomParents(allParents)
-        child = cross.recombination_2fixed_parents(parents[0], parents[1])
-        #child = cross.recombination_all_random(allParents)
-        #child = cross.recombination_all_parents(allParents)
-        #child[2] = sigma
-        child = mut.mutation_case2(child)
+        #parents = get2RandomParents(allParents)
+        ##### child = cross.recombination_2fixed_parents(parents[0], parents[1])
+        ##### child = mut.mutation_case2(child)
+        child = generateIndiv()
         children.append(child)
-    childrenList = sorted(children, key=itemgetter(1))
+    childrenList = sorted(children, key=fitness)
 
 
     return childrenList
 
 
+
 def getAvgFit(pop):
     sum = 0
     for c in pop:
-        sum+=c[1]
+        sum+=c["fitness"]
     return sum/len(pop)
 
 
@@ -164,7 +170,7 @@ def EENutricional():
     generationCount = 0
     condSaida = False
     parents = generatePop(parentCount) # Populacao inicial
-    minFit = parents[0][1]
+    minFit = parents[0]["fitness"]
 
     ##Listas de saida
     minFitList =[]
@@ -174,8 +180,11 @@ def EENutricional():
     while(condSaida == False):
         print(generationCount)
         children = generateChildren(parents,childrenCount)
-        parents = children[:parentCount]
-        minFit = parents[0][1]
+        aux = concatListDict(parents,children)
+        aux = sorted(parents, key=fitness)
+        parents = aux[:parentCount]
+
+        minFit = parents[0]["fitness"]
         avgFit = getAvgFit(parents)
 
         print("Geracao:{} Tamanho da populacao de pais:{} Avg Fitness:{} / Min Fitness:{}".format(generationCount,len(parents), round(avgFit,5),round(minFit,5)))
@@ -187,13 +196,14 @@ def EENutricional():
         #    print([i[2] for i in parents])
 
         generationCount += 1
-        if(generationCount>200):
+        if(generationCount>10):
             condSaida=True
 
 
-    bestIndiv = parents[0][0]
+    bestIndiv = parents[0]
     dataset = {"avgFitList":avgFitList, "minFitList":minFitList,"generationCount":generationCount,"minFit":minFit, "avgFit":avgFit,"bestIndiv":bestIndiv}
-    print("Best solution n={}//Fitness={} {}".format(len (parents[0][0]),parents[0][1],parents[0][0]))
+    print("Best solution n={}//Fitness={} ".format(len (parents),parents[0]['fitness']))
+    displayIndiv(parents[1])
     return dataset
 
 
