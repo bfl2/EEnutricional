@@ -135,7 +135,7 @@ def get2RandomParents(allParents):
     while(i1==i2):
         i1 = random.randint(0,lenParents-1)
         i2 = random.randint(0,lenParents-1)
-    parents = [allParents[i1],allParents[i2]]
+    parents = [dict(allParents[i1]),dict(allParents[i2])]
     return parents
 
 
@@ -197,14 +197,15 @@ def EENutricional():
         ##
 
         generationCount += 1
-        if(generationCount>10):
+        if(generationCount>100):
             condSaida=True
 
 
-    bestIndiv = parents[0]
+    bestIndiv = dict(parents[0])
     dataset = {"avgFitList":avgFitList, "minFitList":minFitList,"generationCount":generationCount,"minFit":minFit, "avgFit":avgFit,"bestIndiv":bestIndiv}
     print("Best solution n={}//Fitness={} ".format(len (parents),parents[0]['fitness']))
     displayIndiv(parents[0])
+
     return dataset
 
 
