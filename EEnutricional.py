@@ -194,6 +194,7 @@ def EENutricional():
         #if(generationCount%10 == 0):
         #    print("population sigma values")
         #    print([i[2] for i in parents])
+        ##
 
         generationCount += 1
         if(generationCount>10):
@@ -203,7 +204,7 @@ def EENutricional():
     bestIndiv = parents[0]
     dataset = {"avgFitList":avgFitList, "minFitList":minFitList,"generationCount":generationCount,"minFit":minFit, "avgFit":avgFit,"bestIndiv":bestIndiv}
     print("Best solution n={}//Fitness={} ".format(len (parents),parents[0]['fitness']))
-    displayIndiv(parents[1])
+    displayIndiv(parents[0])
     return dataset
 
 
