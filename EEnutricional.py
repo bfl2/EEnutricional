@@ -55,27 +55,12 @@ def generateIndiv():
     sigma = [round(random.uniform(-15, 15), 5) for x in range(n)]
 
     while (len(alimentos_quantidade) < n):
-        alimentos_quantidade.append(round(random.uniform(0, 1)))
+        alimentos_quantidade.append(round(random.uniform(0, 1),1))
 
     indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id, "sigma":sigma}
     fit = fitness(indiv)
     indiv["fitness"] = fit
 
-
-    return indiv
-
-def add_alimento(indiv, produto_id, quantidade):
-    done = False
-    arr_index = 0
-    if(type(produto_id)==int): #caso o id do produto seja passado, ao inves do dicionario do produto
-        produto = get_alimento(produto_id)
-        try:
-            arr_index = indiv["alimentos_id"].index(produto_id)
-            indiv["alimentos_quantidade"][arr_index] = round(max((indiv["alimentos_quantidade"][arr_index] + quantidade), 0)) #quantidade sempre positiva
-        except:
-            print("Id do produto:{} fora da selecao de ids".format(produto_id))
-    else:
-        print("add_alimento falhou, produto_id != int")
 
     return indiv
 
@@ -197,7 +182,7 @@ def EENutricional():
         ##
 
         generationCount += 1
-        if(generationCount>100):
+        if(generationCount>10):
             condSaida=True
 
 
