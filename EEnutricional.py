@@ -7,6 +7,17 @@ import nutrientesDataset as nutdts
 
 
 
+def buildIndiv(alimentos_quantidade,sigma):
+    fit ="-1"
+
+    indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id,
+             "sigma": sigma}
+    fit = fitness(indiv)
+    indiv["fitness"]=fit
+
+    return indiv
+
+
 
 def displayIndiv(indiv):
     i =0
@@ -32,12 +43,6 @@ def displayPopFit(pop):
 
 
 
-def fooIndiv():
-    indiv = generateIndiv()
-    sample = random.sample(nutdts.alimentos_id, 10)
-    for id in sample:
-        add_alimento(indiv,id,1)
-    return indiv
 def concatListDict(list1, list2):
     for dict in list2:
         list1.append(dict)
