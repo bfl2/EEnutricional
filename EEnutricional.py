@@ -74,10 +74,10 @@ def generateIndiv():
     n = 60
     fit = "-1"
     alimentos_quantidade = []
-    sigma = [round(random.uniform(-3, 3), 2) for x in range(n)]
+    sigma = [round(random.uniform(-1, 1), 0) for x in range(n)]
 
     while (len(alimentos_quantidade) < n):
-        alimentos_quantidade.append(round(random.uniform(0, 1),1))
+        alimentos_quantidade.append(round(random.uniform(0, 1)))
 
     indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id, "sigma":sigma}
     fit = fitness(indiv)
@@ -108,12 +108,18 @@ def fitness(indiv): #o individuo eh uma cesta de alimentos
     fitnessDebugFlag = False
     fit = 0
     totalNutrientes = sumNutrientes(indiv)
-    pesosNutrientes = [3, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10]  # Ordem:
+    pesosNut1 = [300, 200, 1000, 4, 10, 10, 20, 10, 10, 1, 5, 100, 100, 7, 10, 1000]
+    pesosNut2 = [300, 200, 100, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4000]
+    pesosNutrientes = pesosNut1
     pesosKey = ["proteina","lipideos","colesterol","carboidrato","fibra_alimentar","calcio","magnesio","manganes","fosforo","ferro","sodio","potassio","cobre","zinco","vitamina_c","kcal"]
 
     difPercentual = []
     for key in totalNutrientes:
-        difPercentual.append(abs(totalNutrientes[key]-nutdts.target[key])/nutdts.target[key]) # diferenca absoluta percentual do
+        frac = abs(totalNutrientes[key] - nutdts.target[key]) / nutdts.target[key]
+        if(totalNutrientes[key] < nutdts.target[key]):
+            frac = nutdts.target[key]/(totalNutrientes[key]+0.1)
+
+        difPercentual.append(frac) # diferenca absoluta percentual do
 
 
     difPercentualWeighted = [a * b for a, b in zip(difPercentual, pesosNutrientes)]
@@ -152,8 +158,8 @@ def generateChildren(allParents,childrenCount):
     while (len(children)<childrenCount):
         parents = get2RandomParents(allParents)
         child = recombination_2fixed_parents(parents[0], parents[1])
-        #child = mut.mutation_case2(child)
-        #child = generateIndiv()
+        child = mut.mutation_case2(child)
+
         children.append(child)
 
 
@@ -188,8 +194,8 @@ def EENutricional():
         children = generateChildren(parents,childrenCount)
         aux = concatListDict(parents,children)
         aux = sorted(aux, key=fitness)
-        aux2 = random.sample(aux, 20)
-        parents = concatListDict(aux[:10],aux2)
+        aux2 = random.sample(aux, 5)
+        parents = concatListDict(aux[:25],aux2)
         parents = sorted(parents, key=fitness)
 
         minFit = parents[0]["fitness"]
@@ -205,7 +211,7 @@ def EENutricional():
         ##
 
         generationCount += 1
-        if(generationCount>200):
+        if(generationCount>100):
             condSaida=True
 
 
