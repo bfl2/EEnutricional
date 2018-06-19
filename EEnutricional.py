@@ -57,7 +57,7 @@ def generateIndiv():
     n = 60
     fit = "-1"
     alimentos_quantidade = []
-    sigma = [round(random.uniform(-15, 15), 5) for x in range(n)]
+    sigma = [round(random.uniform(-3, 3), 2) for x in range(n)]
 
     while (len(alimentos_quantidade) < n):
         alimentos_quantidade.append(round(random.uniform(0, 1),1))
@@ -130,7 +130,6 @@ def get2RandomParents(allParents):
 
 
 def generateChildren(allParents,childrenCount):
-    sigma = 0.2
     children = []
     childrenList = []
     while (len(children)<childrenCount):
