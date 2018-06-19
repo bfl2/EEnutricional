@@ -1,6 +1,7 @@
 from numpy.random import normal as N
 from math import exp, sqrt
 import numpy as np
+from random import randint
 
 
 def fitness(chromossome): ### Entrada eh uma lista com 30 floats
@@ -38,38 +39,19 @@ def mutation_case1(indiv):###entrada eh uma lista da forma [cromossomo,fitness, 
 
     return mutationedF
 
-#essa funcao implementa a segunda versao da estrategia evolutica considerando sigmas independentes
+#mutacao basica: troca aleatoriamente posicao de dois elementos, alterando a composicao da cesta
 def mutation_case2(indiv):
-    chromosome = indiv[0]
-    sigma = indiv[-1]
-    mutationed = chromosome[:]
-    n = len(chromosome) 
-
-    epson_0 = 0.0001 
-    learning_rate = 1/sqrt(2*n)
-    learning_rate_line = 1/sqrt(2*sqrt(n))
-    
-    var_fix = N(0,1)
-    sigma_line = []
-    
-    for i in range(0,n): ###sigma nao eh o ultimo elemento da lista de cromossomo e sim do individuo
-        var_aleat = N(0,1)
-        
-        sigma_line.append(sigma[i]*exp((learning_rate_line * var_fix) + (learning_rate * var_aleat)))
-        
-        if sigma_line[i] < epson_0:
-            sigma_line[i] = epson_0
-            
-        mutationed[i] = (chromosome[i] + sigma_line[i] * var_aleat)
-        aux = fitness(mutationed)
-        if(aux > indiv[1]):
-            mutationed[i] = chromosome[i]
+    chromosome = indiv["alimentos_quantidade"]
+    n = len(chromosome)
+    pos_aleat1 = randint(0,n-1)
+    pos_aleat2 = randint(0,n-1)
+    aux = 0
+    aux = chromosome[pos_aleat1]
+    chromosome[pos_aleat1] = chromosome[pos_aleat2]
+    chromosome[pos_aleat2] = aux
 
 
-    ### Mutacao tem que retornar individuo no formato: [cromossomo, fitness, sigma]
-    mutationedF = [mutationed, fitness(mutationed), sigma_line]
-
-    return mutationedF
+    return indiv
 
 
 if __name__ == '__main__':
