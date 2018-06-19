@@ -24,6 +24,8 @@ def displayIndiv(indiv):
     i =0
     nutKeys = ["proteina", "lipideos", "colesterol", "carboidrato", "fibra_alimentar", "calcio", "magnesio",
                 "manganes", "fosforo", "ferro", "sodio", "potassio", "cobre", "zinco", "vitamina_c", "kcal"]
+    print("Individuo: Fitness{}".format(indiv["fitness"]))
+
     for ali_id in indiv["alimentos_id"]:
 
         if(indiv["alimentos_quantidade"][i]>0):
@@ -61,7 +63,11 @@ def generateIndiv():
     sigma = [round(random.uniform(-1, 1), 0) for x in range(n)]
 
     while (len(alimentos_quantidade) < n):
-        alimentos_quantidade.append(round(random.uniform(0, 1)))
+        seed = random.randint(0,1)
+        if(seed==0):
+            alimentos_quantidade.append(round(random.uniform(0, 3)))
+        else:
+            alimentos_quantidade.append(0)
 
     indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id, "sigma":sigma}
     fit = fitness(indiv)
@@ -142,7 +148,7 @@ def generateChildren(allParents,childrenCount):
     while (len(children)<childrenCount):
         parents = get2RandomParents(allParents)
         child = cross.recombination_2fixed_parents(parents[0], parents[1])
-        child = mut.mutation_case2(child)
+        child = mut.mutation_case1(child)
 
         children.append(child)
 
@@ -195,7 +201,7 @@ def EENutricional():
         ##
 
         generationCount += 1
-        if(generationCount>100):
+        if(generationCount>200):
             condSaida=True
 
 
@@ -203,6 +209,8 @@ def EENutricional():
     dataset = {"avgFitList":avgFitList, "minFitList":minFitList,"generationCount":generationCount,"minFit":minFit, "avgFit":avgFit,"bestIndiv":bestIndiv}
     print("Best solution n={}//Fitness={} ".format(len (parents),parents[0]['fitness']))
     displayIndiv(parents[0])
+    displayIndiv(parents[15])
+    displayIndiv(parents[28])
 
     return dataset
 

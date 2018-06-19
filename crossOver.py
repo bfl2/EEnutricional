@@ -68,8 +68,8 @@ def recombination_2fixed_parents(parent_1, parent_2):
     zip_alimentos = zip(alimentos_qtd_1, alimentos_qtd_2)
     zip_sigmas = zip(list(sigma_1), list(sigma_2))
 
-    child = [round((x[0] + x[1]), 1) / 2 for x in zip_alimentos]
-    sigma_child = [round((s[0] + s[1]), 1) / 2 for s in zip_sigmas]
+    child = [round((x[0] + x[1]), 0) / 2 for x in zip_alimentos]
+    sigma_child = [round((s[0] + s[1]), 0) / 2 for s in zip_sigmas]
 
     return buildIndiv(child, sigma_child)
 
