@@ -1,51 +1,71 @@
 ﻿from random import randint
 import numpy as np
 
-def fitness(chromossome):
-    c1=20
-    c2=0.2
-    c3=2*np.pi
-    sum1 = 0
-    sum2 = 0
-    for xi in chromossome:
-        sum1+= xi**2
-        sum2+= np.cos(c3*xi)
-    sum1 = sum1/len(chromossome)
-    sum2 = sum2/len(chromossome)
-    fit = -c1*np.exp(-c2*np.sqrt(sum1)) - np.exp(sum2) + c1 + np.e
-    return round(fit,5)
+def fitness(indiv): #o individuo eh uma cesta de alimentos
+    fitnessDebugFlag = False
+    fit = 0
+    totalNutrientes = sumNutrientes(indiv)
+    pesosNutrientes = [3, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10]  # Ordem:
+    pesosKey = ["proteina","lipideos","colesterol","carboidrato","fibra_alimentar","calcio","magnesio","manganes","fosforo","ferro","sodio","potassio","cobre","zinco","vitamina_c","kcal"]
+
+    difPercentual = []
+    for key in totalNutrientes:
+        difPercentual.append(abs(totalNutrientes[key]-nutdts.target[key])/nutdts.target[key]) # diferenca absoluta percentual do
+
+
+    difPercentualWeighted = [a * b for a, b in zip(difPercentual, pesosNutrientes)]
+    if(fitnessDebugFlag == True):
+        print(difPercentual)
+        print(difPercentualWeighted, len(difPercentual))
+        print(totalNutrientes)
+    fit = sum(difPercentualWeighted)
+    indiv["fitness"] = fit
+
+    return fit
+
+def sumNutrientes(indiv):
+    totalNutrientes = {'proteina': 0, 'lipideos': 0, 'colesterol': 0, 'carboidrato': 0, 'fibra_alimentar': 0,
+                       'calcio': 0, 'magnesio': 0, 'manganes': 0, 'fosforo': 0,
+                       'ferro': 0, 'sodio': 0, 'potassio': 0, 'cobre': 0, 'zinco': 0, 'vitamina_c': 0, 'kcal': 0}
+    i = 0
+    for alimento_id in indiv["alimentos_id"]:  # Somando os nutrientes
+        alimento = get_alimento(alimento_id)
+        for nutriente in totalNutrientes:
+            totalNutrientes[nutriente] = totalNutrientes[nutriente] + alimento[nutriente]*indiv["alimentos_quantidade"][i]
+        i+=1
+
+    return totalNutrientes
+
+
+def buildIndiv(alimentos_quantidade,sigma):
+    fit ="-1"
+
+    indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id,
+             "sigma": sigma}
+    fit = fitness(indiv)
+    indiv["fitness"]=fit
+
+    return indiv
+
 
 #   Input Format ([Chromosome, Fitness, sigma])
-def recombination_2fixed_parents(parent1, parent2):
+def recombination_2fixed_parents(parent_1, parent_2):
 
     """Cada gene do filho eh a média de cada gene dos pais"""
 
-    parent_1 = parent1[0]
-    parent_2 = parent2[0]
+    alimentos_qtd_1 = parent_1["alimentos_quantidade"]
+    alimentos_qtd_2 = parent_2["alimentos_quantidade"]
 
-    sigma_1 = parent1[2]
-    sigma_2 = parent2[2]
+    sigma_1 = parent_1["sigma"]
+    sigma_2 = parent_2["sigma"]
 
-    is_float = False
-
-    zip_parents = zip(parent_1, parent_2)
-
-    if type(sigma_1) is float:
-        sigma_1 = [sigma_1]
-        sigma_2 = [sigma_2]
-        is_float = True
-
+    zip_alimentos = zip(alimentos_qtd_1, alimentos_qtd_2)
     zip_sigmas = zip(list(sigma_1), list(sigma_2))
 
-    child = [(x[0] + x[1])/2 for x in zip_parents]
-    sigma_child = [(s[0] + s[1])/2 for s in zip_sigmas]
+    child = [round((x[0] + x[1]), 1) / 2 for x in zip_alimentos]
+    sigma_child = [round((s[0] + s[1]), 1) / 2 for s in zip_sigmas]
 
-    fitness_child = fitness(child)
-
-    if is_float:
-        sigma_child = sigma_child[0]
-
-    return [child, fitness_child, sigma_child]
+    return buildIndiv(child, sigma_child)
 
 
 def recombination_2fixed_random(parent1, parent2):

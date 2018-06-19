@@ -1,11 +1,28 @@
-import crossOver as cross
+#import crossOver as cross
 import mutation as mut
 import random
 import numpy as np
 from operator import itemgetter
 import nutrientesDataset as nutdts
 
+#   Input Format ([Chromosome, Fitness, sigma])
+def recombination_2fixed_parents(parent_1, parent_2):
 
+    """Cada gene do filho eh a média de cada gene dos pais"""
+
+    alimentos_qtd_1 = parent_1["alimentos_quantidade"]
+    alimentos_qtd_2 = parent_2["alimentos_quantidade"]
+
+    sigma_1 = parent_1["sigma"]
+    sigma_2 = parent_2["sigma"]
+
+    zip_alimentos = zip(alimentos_qtd_1, alimentos_qtd_2)
+    zip_sigmas = zip(list(sigma_1), list(sigma_2))
+
+    child = [round((x[0] + x[1]), 1) / 2 for x in zip_alimentos]
+    sigma_child = [round((s[0] + s[1]), 1) / 2 for s in zip_sigmas]
+
+    return buildIndiv(child, sigma_child)
 
 def buildIndiv(alimentos_quantidade,sigma):
     fit ="-1"
@@ -133,10 +150,10 @@ def generateChildren(allParents,childrenCount):
     children = []
     childrenList = []
     while (len(children)<childrenCount):
-        #parents = get2RandomParents(allParents)
-        ##### child = cross.recombination_2fixed_parents(parents[0], parents[1])
-        ##### child = mut.mutation_case2(child)
-        child = generateIndiv()
+        parents = get2RandomParents(allParents)
+        child = recombination_2fixed_parents(parents[0], parents[1])
+        #child = mut.mutation_case2(child)
+        #child = generateIndiv()
         children.append(child)
     childrenList = sorted(children, key=fitness)
 
@@ -186,7 +203,7 @@ def EENutricional():
         ##
 
         generationCount += 1
-        if(generationCount>10):
+        if(generationCount>200):
             condSaida=True
 
 
