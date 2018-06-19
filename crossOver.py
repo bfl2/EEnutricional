@@ -1,5 +1,6 @@
 ﻿from random import randint
 import numpy as np
+import nutrientesDataset as nutdts
 
 def fitness(indiv): #o individuo eh uma cesta de alimentos
     fitnessDebugFlag = False
@@ -22,6 +23,11 @@ def fitness(indiv): #o individuo eh uma cesta de alimentos
     indiv["fitness"] = fit
 
     return fit
+
+def get_alimento(id):
+    produtoCopy = dict(nutdts.nutDataset[id])
+    return produtoCopy
+
 
 def sumNutrientes(indiv):
     totalNutrientes = {'proteina': 0, 'lipideos': 0, 'colesterol': 0, 'carboidrato': 0, 'fibra_alimentar': 0,
@@ -68,35 +74,23 @@ def recombination_2fixed_parents(parent_1, parent_2):
     return buildIndiv(child, sigma_child)
 
 
-def recombination_2fixed_random(parent1, parent2):
+def recombination_2fixed_random(parent_1, parent_2):
 
     """Cada gene do filho eh a escolha aleatoria do gene do primeiro ou segundo pai"""
-    parent_1 = parent1[0]
-    parent_2 = parent2[0]
+    alimentos_qtd_1 = parent_1["alimentos_quantidade"]
+    alimentos_qtd_2 = parent_2["alimentos_quantidade"]
 
-    sigma_1 = parent1[2]
-    sigma_2 = parent2[2]
+    sigma_1 = parent_1["sigma"]
+    sigma_2 = parent_2["sigma"]
 
-    is_float = False
+    zip_alimentos = zip(alimentos_qtd_1, alimentos_qtd_2)
+    zip_sigmas = zip(list(sigma_1), list(sigma_2))
 
-    zip_parents = zip(parent_1, parent_2)
-
-    if type(sigma_1) is float:
-        sigma_1 = [sigma_1]
-        sigma_2 = [sigma_2]
-        is_float = True
-
-    zip_sigmas = zip(sigma_1, sigma_2)
-
-    child = [x[randint(0, 1)] for x in zip_parents]
+    child = [x[randint(0, 1)] for x in zip_alimentos]
     sigma_child = [s[randint(0, 1)] for s in zip_sigmas]
 
-    fitness_child = fitness(child)
 
-    if is_float:
-        sigma_child = sigma_child[0]
-
-    return [child, fitness_child, sigma_child]
+    return buildIndiv(child, sigma_child)
 
 
 #   Receive a population of individuals
