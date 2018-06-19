@@ -63,11 +63,9 @@ def generateIndiv():
     sigma = [round(random.uniform(-1, 1), 0) for x in range(n)]
 
     while (len(alimentos_quantidade) < n):
-        seed = random.randint(0,1)
-        if(seed==0):
-            alimentos_quantidade.append(round(random.uniform(0, 3)))
-        else:
-            alimentos_quantidade.append(0)
+
+        alimentos_quantidade.append(round(random.uniform(0, 1)))
+
 
     indiv = {"fitness": fit, "alimentos_quantidade": alimentos_quantidade, "alimentos_id": nutdts.alimentos_id, "sigma":sigma}
     fit = fitness(indiv)
@@ -201,7 +199,7 @@ def EENutricional():
         ##
 
         generationCount += 1
-        if(generationCount>200):
+        if(generationCount>500):
             condSaida=True
 
 
