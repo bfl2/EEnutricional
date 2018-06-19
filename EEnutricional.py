@@ -155,10 +155,10 @@ def generateChildren(allParents,childrenCount):
         #child = mut.mutation_case2(child)
         #child = generateIndiv()
         children.append(child)
-    childrenList = sorted(children, key=fitness)
 
 
-    return childrenList
+
+    return children
 
 
 
@@ -187,8 +187,10 @@ def EENutricional():
         print(generationCount)
         children = generateChildren(parents,childrenCount)
         aux = concatListDict(parents,children)
-        aux = sorted(parents, key=fitness)
-        parents = aux[:parentCount]
+        aux = sorted(aux, key=fitness)
+        aux2 = random.sample(aux, 20)
+        parents = concatListDict(aux[:10],aux2)
+        parents = sorted(parents, key=fitness)
 
         minFit = parents[0]["fitness"]
         avgFit = getAvgFit(parents)
